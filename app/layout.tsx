@@ -51,7 +51,7 @@ export const metadata: Metadata = {
     locale: "id_ID",
     images: [
       {
-        url: "/op-image.png",
+        url: `${BASE_URL}/op-image.png`,
         width: 1200,
         height: 630,
         alt: "POINT – Paguyuban Online Lintas Timur Karawang",
@@ -68,7 +68,7 @@ export const metadata: Metadata = {
     title: "POINT – Solidaritas Tanpa Batas",
     description:
       "Komunitas driver online di Karawang yang bersatu lintas platform dalam solidaritas tanpa batas.",
-    images: ["/op-image.png"],
+    images: [`${BASE_URL}/op-image.png`],
   },
 
   // ─── PWA / App ─────────────────────────────────────────────────────────────

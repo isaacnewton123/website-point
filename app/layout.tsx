@@ -37,6 +37,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="id" className={inter.variable}>
+      <head>
+        <meta name="apple-mobile-web-app-title" content="POINT - Karawang" />
+      </head>
       <body className="antialiased">{children}</body>
     </html>
   );

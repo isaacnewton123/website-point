@@ -8,8 +8,9 @@ const inter = Inter({
   variable: "--font-inter",
 });
 
-// ─── Update BASE_URL saat deploy ─────────────────────────────────────────────
-const BASE_URL = "https://point-karawang.netlify.app";
+// ─── Ganti dengan URL Netlify/domain Anda yang aktif ─────────────────────────
+const BASE_URL = "https://point-karawang.netlify.app"; // ← update ini
+const OG_IMAGE = "https://raw.githubusercontent.com/isaacnewton123/website-point/main/public/op-image.png";
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const metadata: Metadata = {
@@ -51,7 +52,7 @@ export const metadata: Metadata = {
     locale: "id_ID",
     images: [
       {
-        url: `${BASE_URL}/op-image.png`,
+        url: OG_IMAGE,
         width: 1200,
         height: 630,
         alt: "POINT – Paguyuban Online Lintas Timur Karawang",
@@ -68,7 +69,7 @@ export const metadata: Metadata = {
     title: "POINT – Solidaritas Tanpa Batas",
     description:
       "Komunitas driver online di Karawang yang bersatu lintas platform dalam solidaritas tanpa batas.",
-    images: [`${BASE_URL}/op-image.png`],
+    images: [OG_IMAGE],
   },
 
   // ─── PWA / App ─────────────────────────────────────────────────────────────

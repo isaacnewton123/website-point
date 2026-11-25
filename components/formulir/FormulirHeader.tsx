@@ -39,7 +39,7 @@ export default function FormulirHeader() {
             Formulir Pendaftaran <span style={{ color: "var(--orange)" }}>POINT</span>
           </h1>
           <p style={{ color: "rgba(255,255,255,0.68)", fontSize: "0.95rem", maxWidth: "34rem", margin: "0 auto", lineHeight: 1.65 }}>
-            Lengkapi data pendaftaran anggota baru Paguyuban Online Lintas Timur (POINT) Karawang.
+            Isi formulir di bawah untuk mendaftar. Data kamu akan otomatis aktif setelah bergabung ke grup WhatsApp POINT.
           </p>
         </div>
         <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, lineHeight: 0 }}>

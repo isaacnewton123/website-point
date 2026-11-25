@@ -1,105 +1,64 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { getFormSecret, verifikasiTokenFormulir } from "@/lib/formulir-token";
 import {
   KOLOM_WAJIB,
   LABEL_KOLOM,
+  normalisasiNomor,
   validasiKolom,
   type KolomWajib,
 } from "@/lib/formulir-validasi";
-import {
-  ambilAnggotaByNomor,
-  getDatabaseUrl,
-  simpanAnggotaFormulir,
-  type AnggotaProfilRow,
-} from "@/lib/neon";
+import { simpanPendaftar } from "@/lib/neon";
 
 export const dynamic = "force-dynamic";
 
-type BodyPayload = Partial<Record<"token" | KolomWajib, unknown>>;
-
-const PESAN_TERKUNCI =
-  "Formulir pendaftaran hanya bisa diakses melalui tautan undangan resmi dari grup WhatsApp POINT.";
-
-function verifikasiUndangan(tokenRaw: unknown, secret: string): string | null {
-  if (typeof tokenRaw !== "string" || !tokenRaw.trim()) return null;
-  return verifikasiTokenFormulir(tokenRaw.trim(), secret)?.nomor ?? null;
-}
-
-function bentukProfil(row: AnggotaProfilRow | null) {
-  return {
-    nama_lengkap: row?.nama_lengkap ?? "",
-    tanggal_lahir: row?.tanggal_lahir ?? "",
-    alamat: row?.alamat ?? "",
-    plat: row?.plat ?? "",
-    tipe_warna_unit: row?.tipe_warna_unit ?? "",
-  };
-}
+type BodyPayload = Partial<Record<"nomor" | "website" | KolomWajib, unknown>>;
 
 function validasiPayload(body: BodyPayload) {
-  const isian: Partial<Record<KolomWajib, string>> = {};
   const errors: Record<string, string> = {};
+  const rawNomor = typeof body.nomor === "string" ? body.nomor : "";
+  const nomor = normalisasiNomor(rawNomor);
+  if (!nomor) {
+    errors.nomor = rawNomor.trim()
+      ? "Format nomor WhatsApp tidak valid (contoh: 081234567890)."
+      : "Nomor WhatsApp wajib diisi.";
+  }
+
+  const isian: Partial<Record<KolomWajib, string>> = {};
   for (const kolom of KOLOM_WAJIB) {
-    const mentah = body[kolom];
-    if (typeof mentah !== "string" || !mentah.trim()) continue;
-    const bersih = validasiKolom(kolom, mentah);
+    const raw = typeof body[kolom] === "string" ? body[kolom].trim() : "";
+    if (!raw) {
+      errors[kolom] = `${LABEL_KOLOM[kolom]} wajib diisi.`;
+      continue;
+    }
+    const bersih = validasiKolom(kolom, raw);
     if (bersih) isian[kolom] = bersih;
     else errors[kolom] = `${LABEL_KOLOM[kolom]} belum valid.`;
   }
-  return { isian, errors };
-}
 
-export async function GET(request: NextRequest) {
-  try {
-    const secret = getFormSecret(getDatabaseUrl());
-    const nomor = verifikasiUndangan(request.nextUrl.searchParams.get("t"), secret);
-    if (!nomor) {
-      return NextResponse.json({ ok: false, error: PESAN_TERKUNCI }, { status: 401 });
-    }
-    const anggota = await ambilAnggotaByNomor(nomor);
-    return NextResponse.json({
-      ok: true,
-      ditemukan: Boolean(anggota),
-      nomor,
-      status: anggota?.status ?? "DATA_KURANG",
-      kekurangan: anggota?.kekurangan ?? [...KOLOM_WAJIB],
-      profil: bentukProfil(anggota),
-    });
-  } catch (err) {
-    const msg = err instanceof Error ? err.message : "Terjadi kesalahan server";
-    return NextResponse.json({ ok: false, error: msg }, { status: 500 });
-  }
+  return { nomor, isian: isian as Record<KolomWajib, string>, errors };
 }
 
 export async function POST(request: NextRequest) {
   try {
     const body = (await request.json().catch(() => ({}))) as BodyPayload;
-    const secret = getFormSecret(getDatabaseUrl());
-    const nomor = verifikasiUndangan(body.token, secret);
-    if (!nomor) {
-      return NextResponse.json({ ok: false, error: PESAN_TERKUNCI }, { status: 401 });
+    if (typeof body.website === "string" && body.website.trim() !== "") {
+      return NextResponse.json({ ok: true, status: "menunggu" });
     }
 
-    const { isian, errors } = validasiPayload(body);
-    if (Object.keys(errors).length > 0) {
+    const { nomor, isian, errors } = validasiPayload(body);
+    if (!nomor || Object.keys(errors).length > 0) {
       return NextResponse.json(
-        { ok: false, error: "Ada isian yang belum valid, silakan diperbaiki.", errors },
-        { status: 422 },
-      );
-    }
-    if (Object.keys(isian).length === 0) {
-      return NextResponse.json(
-        { ok: false, error: "Isi minimal satu kolom sebelum menyimpan.", errors: {} },
+        { ok: false, error: "Periksa kembali semua isian yang wajib dilengkapi.", errors },
         { status: 422 },
       );
     }
 
-    const anggota = await simpanAnggotaFormulir(nomor, isian);
+    const hasil = await simpanPendaftar({ nomor, ...isian });
     return NextResponse.json({
       ok: true,
-      nomor: anggota.nomor,
-      status: anggota.status,
-      kekurangan: anggota.kekurangan,
-      profil: bentukProfil(anggota),
+      nomor: hasil.nomor,
+      nama_lengkap: hasil.nama_lengkap,
+      status: hasil.status,
+      sudahDisetujui: hasil.sudahDisetujui,
     });
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Terjadi kesalahan server";

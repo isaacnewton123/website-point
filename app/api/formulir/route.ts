@@ -41,7 +41,12 @@ export async function POST(request: NextRequest) {
   try {
     const body = (await request.json().catch(() => ({}))) as BodyPayload;
     if (typeof body.website === "string" && body.website.trim() !== "") {
-      return NextResponse.json({ ok: true, status: "menunggu" });
+      return NextResponse.json({
+        ok: true,
+        status: "menunggu",
+        sudahDisetujui: false,
+        langsungAktif: false,
+      });
     }
 
     const { nomor, isian, errors } = validasiPayload(body);
@@ -59,6 +64,7 @@ export async function POST(request: NextRequest) {
       nama_lengkap: hasil.nama_lengkap,
       status: hasil.status,
       sudahDisetujui: hasil.sudahDisetujui,
+      langsungAktif: hasil.langsungAktif,
     });
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Terjadi kesalahan server";

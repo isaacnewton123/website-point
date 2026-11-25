@@ -12,6 +12,7 @@ export type SubmitResponse = {
   nama_lengkap?: string;
   status?: string;
   sudahDisetujui?: boolean;
+  langsungAktif?: boolean;
   error?: string;
   errors?: Record<string, string>;
 };
@@ -91,15 +92,41 @@ export function FormField(props: {
   );
 }
 
+function teksSukses(props: {
+  nama: string;
+  nomor: string;
+  sudahDisetujui: boolean;
+  langsungAktif: boolean;
+}) {
+  if (props.langsungAktif) {
+    return {
+      judul: "Data Anggota Otomatis Aktif!",
+      deskripsi: `Terima kasih ${props.nama}! Karena nomor ${props.nomor} sudah tergabung di grup WhatsApp POINT, data kamu langsung dilengkapi dan resmi aktif di database anggota.`,
+      pesanWa: `Halo admin POINT, saya ${props.nama} (${props.nomor}) baru melengkapi formulir anggota di website.`,
+    };
+  }
+  if (props.sudahDisetujui) {
+    return {
+      judul: "Kamu Sudah Terdaftar Resmi!",
+      deskripsi: `Nomor ${props.nomor} (${props.nama}) sudah terdaftar dan lengkap di database anggota POINT.`,
+      pesanWa: `Halo admin POINT, saya ${props.nama} (${props.nomor}) ingin konfirmasi data anggota.`,
+    };
+  }
+  return {
+    judul: "Pendaftaran Diterima!",
+    deskripsi: `Terima kasih ${props.nama}. Data pendaftaran untuk ${props.nomor} sudah masuk antrean dan akan otomatis aktif begitu kamu masuk grup WhatsApp POINT.`,
+    pesanWa: `Halo admin POINT, saya ${props.nama} (${props.nomor}) sudah mengisi formulir pendaftaran anggota.`,
+  };
+}
+
 export function SuccessCard(props: {
   nama: string;
   nomor: string;
   sudahDisetujui: boolean;
+  langsungAktif: boolean;
   onReset: () => void;
 }) {
-  const pesanWa = encodeURIComponent(
-    `Halo admin POINT, saya ${props.nama} (${props.nomor}) sudah mengisi formulir pendaftaran anggota.`,
-  );
+  const { judul, deskripsi, pesanWa } = teksSukses(props);
   return (
     <div style={{ textAlign: "center", padding: "0.5rem 0" }}>
       <div style={{
@@ -110,15 +137,13 @@ export function SuccessCard(props: {
         <FiCheckCircle size={28} />
       </div>
       <h2 style={{ fontFamily: "var(--font-display)", fontSize: "1.25rem", fontWeight: 700, marginBottom: "0.55rem" }}>
-        {props.sudahDisetujui ? "Kamu Sudah Terdaftar Resmi!" : "Pendaftaran Diterima!"}
+        {judul}
       </h2>
       <p style={{ color: "var(--text-muted)", fontSize: "0.9rem", lineHeight: 1.65, marginBottom: "1.5rem" }}>
-        {props.sudahDisetujui
-          ? `Nomor ${props.nomor} (${props.nama}) sudah disetujui dan terdaftar di database anggota POINT.`
-          : `Terima kasih ${props.nama}. Data pendaftaran untuk ${props.nomor} sudah masuk antrean dan akan otomatis aktif begitu kamu masuk grup WhatsApp POINT.`}
+        {deskripsi}
       </p>
       <div style={{ display: "flex", flexDirection: "column", gap: "0.65rem" }}>
-        <a href={`https://wa.me/6283117772744?text=${pesanWa}`} target="_blank" rel="noopener noreferrer"
+        <a href={`https://wa.me/6283117772744?text=${encodeURIComponent(pesanWa)}`} target="_blank" rel="noopener noreferrer"
           className="btn" style={{ background: "#22c55e", color: "#fff", width: "100%", justifyContent: "center", gap: "0.5rem" }}>
           <FaWhatsapp size={18} /> Konfirmasi ke Admin WhatsApp
         </a>

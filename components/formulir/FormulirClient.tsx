@@ -32,7 +32,12 @@ function usePendaftaranState() {
   const [saving, setSaving] = useState(false);
   const [alert, setAlert] = useState<string | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [sukses, setSukses] = useState<{ nama: string; nomor: string; sudahDisetujui: boolean } | null>(null);
+  const [sukses, setSukses] = useState<{
+    nama: string;
+    nomor: string;
+    sudahDisetujui: boolean;
+    langsungAktif: boolean;
+  } | null>(null);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -50,6 +55,7 @@ function usePendaftaranState() {
         nama: data.nama_lengkap ?? values.nama_lengkap,
         nomor: data.nomor ?? values.nomor,
         sudahDisetujui: Boolean(data.sudahDisetujui),
+        langsungAktif: Boolean(data.langsungAktif),
       });
     } catch {
       setAlert("Gagal mengirim pendaftaran ke server.");
@@ -111,7 +117,8 @@ export default function FormulirClient() {
           )}
           {st.sukses ? (
             <SuccessCard nama={st.sukses.nama} nomor={st.sukses.nomor}
-              sudahDisetujui={st.sukses.sudahDisetujui} onReset={st.reset} />
+              sudahDisetujui={st.sukses.sudahDisetujui} langsungAktif={st.sukses.langsungAktif}
+              onReset={st.reset} />
           ) : (
             <RegistrationForm values={st.values} website={st.website} errors={st.errors}
               saving={st.saving} onFieldChange={st.updateField}

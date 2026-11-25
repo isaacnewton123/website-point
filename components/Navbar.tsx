@@ -13,6 +13,35 @@ const NAV_LINKS = [
   { label: "Kontak", href: "#kontak" },
 ];
 
+function MobileMenu(props: {
+  isOpen: boolean;
+  onClose: () => void;
+  onNavigate: (href: string) => void;
+}) {
+  return (
+    <>
+      <div className={`mobile-overlay${props.isOpen ? " open" : ""}`} onClick={props.onClose} />
+      <div className={`mobile-menu${props.isOpen ? " open" : ""}`}>
+        <button onClick={props.onClose}
+          style={{ position: "absolute", top: "1rem", right: "1rem", background: "none", border: "none", color: "rgba(255,255,255,0.7)", cursor: "pointer" }}>
+          <FiX size={22} />
+        </button>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", marginBottom: "1.5rem" }}>
+          <Image src="/logo-dark.png" alt="POINT" width={32} height={32} style={{ objectFit: "contain" }} />
+          <span style={{ fontWeight: 800, color: "#fff", letterSpacing: "0.08em" }}>POINT</span>
+        </div>
+        {NAV_LINKS.map((l) => (
+          <button key={l.href} onClick={() => props.onNavigate(l.href)} className="mobile-link">{l.label}</button>
+        ))}
+        <button onClick={() => props.onNavigate("#kontak")} className="btn btn-primary"
+          style={{ marginTop: "1rem", width: "100%", justifyContent: "center" }}>
+          Gabung Sekarang
+        </button>
+      </div>
+    </>
+  );
+}
+
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -32,14 +61,12 @@ export default function Navbar() {
     <>
       <nav className={`navbar${scrolled ? " scrolled" : ""}`}>
         <div className="container" style={{ height: "100%", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          {/* Logo */}
           <button onClick={() => scrollTo("#beranda")} id="nav-logo"
             style={{ display: "flex", alignItems: "center", gap: "0.6rem", background: "none", border: "none", cursor: "pointer" }}>
             <Image src="/logo-dark.png" alt="POINT" width={38} height={38} style={{ objectFit: "contain" }} />
             <span style={{ fontWeight: 800, fontSize: "1.1rem", color: "#fff", letterSpacing: "0.08em" }}>POINT</span>
           </button>
 
-          {/* Desktop links */}
           <div style={{ display: "flex", alignItems: "center", gap: "1.75rem" }} className="desktop-nav">
             {NAV_LINKS.map((l) => (
               <button key={l.href} id={`nav-${l.label.toLowerCase()}`}
@@ -51,7 +78,6 @@ export default function Navbar() {
             </button>
           </div>
 
-          {/* Mobile toggle */}
           <button id="nav-mobile-toggle" onClick={() => setIsOpen(!isOpen)}
             style={{ display: "none", background: "none", border: "none", cursor: "pointer", color: "#fff", padding: "0.25rem" }}
             className="mobile-toggle" aria-label="Toggle menu">
@@ -60,27 +86,7 @@ export default function Navbar() {
         </div>
       </nav>
 
-      {/* Mobile overlay */}
-      <div className={`mobile-overlay${isOpen ? " open" : ""}`} onClick={() => setIsOpen(false)} />
-
-      {/* Mobile menu */}
-      <div className={`mobile-menu${isOpen ? " open" : ""}`}>
-        <button onClick={() => setIsOpen(false)}
-          style={{ position: "absolute", top: "1rem", right: "1rem", background: "none", border: "none", color: "rgba(255,255,255,0.7)", cursor: "pointer" }}>
-          <FiX size={22} />
-        </button>
-        <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", marginBottom: "1.5rem" }}>
-          <Image src="/logo-dark.png" alt="POINT" width={32} height={32} style={{ objectFit: "contain" }} />
-          <span style={{ fontWeight: 800, color: "#fff", letterSpacing: "0.08em" }}>POINT</span>
-        </div>
-        {NAV_LINKS.map((l) => (
-          <button key={l.href} onClick={() => scrollTo(l.href)} className="mobile-link">{l.label}</button>
-        ))}
-        <button onClick={() => scrollTo("#kontak")} className="btn btn-primary"
-          style={{ marginTop: "1rem", width: "100%", justifyContent: "center" }}>
-          Gabung Sekarang
-        </button>
-      </div>
+      <MobileMenu isOpen={isOpen} onClose={() => setIsOpen(false)} onNavigate={scrollTo} />
 
       <style>{`
         @media (max-width: 768px) {

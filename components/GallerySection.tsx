@@ -16,6 +16,42 @@ const ITEMS = [
   { id: 9, src: "https://picsum.photos/seed/point9/800/600", caption: "Touring Bersama POINT" },
 ];
 
+function GalleryLightbox(props: {
+  index: number;
+  onClose: () => void;
+  onPrev: () => void;
+  onNext: () => void;
+}) {
+  const item = ITEMS[props.index];
+  return (
+    <div className="lightbox" onClick={props.onClose}>
+      <div style={{ position: "relative", maxWidth: 860, width: "100%" }} onClick={(e) => e.stopPropagation()}>
+        <button id="lightbox-close" onClick={props.onClose} style={{
+          position: "absolute", top: -44, right: 0, background: "rgba(255,255,255,0.1)",
+          border: "none", borderRadius: 8, padding: "0.4rem", color: "#fff", cursor: "pointer", display: "flex",
+        }}>
+          <FiX size={22} />
+        </button>
+        <div style={{ position: "relative", aspectRatio: "4/3", borderRadius: 16, overflow: "hidden", background: "#0a0a0a" }}>
+          <Image src={item.src} alt={item.caption} fill style={{ objectFit: "contain" }} sizes="100vw" />
+        </div>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: "1rem", color: "#fff" }}>
+          <button id="lightbox-prev" onClick={props.onPrev} style={{ background: "rgba(255,255,255,0.1)", border: "none", borderRadius: 8, padding: "0.6rem", color: "#fff", cursor: "pointer", display: "flex" }}>
+            <FiChevronLeft size={20} />
+          </button>
+          <div style={{ textAlign: "center" }}>
+            <p style={{ fontWeight: 600, fontSize: "0.9rem" }}>{item.caption}</p>
+            <p style={{ color: "rgba(255,255,255,0.45)", fontSize: "0.78rem" }}>{props.index + 1} / {ITEMS.length}</p>
+          </div>
+          <button id="lightbox-next" onClick={props.onNext} style={{ background: "rgba(255,255,255,0.1)", border: "none", borderRadius: 8, padding: "0.6rem", color: "#fff", cursor: "pointer", display: "flex" }}>
+            <FiChevronRight size={20} />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function GallerySection() {
   const [lb, setLb] = useState<number | null>(null);
   const prev = () => setLb((i) => (i !== null ? (i - 1 + ITEMS.length) % ITEMS.length : null));
@@ -34,7 +70,6 @@ export default function GallerySection() {
           </p>
         </div>
 
-        {/* uses .grid-gallery class — 3 col → 2 col → 1 col */}
         <div className="grid-gallery">
           {ITEMS.map((item, idx) => (
             <button key={item.id} id={`gallery-item-${item.id}`}
@@ -54,33 +89,8 @@ export default function GallerySection() {
         </div>
       </div>
 
-      {/* Lightbox */}
       {lb !== null && (
-        <div className="lightbox" onClick={() => setLb(null)}>
-          <div style={{ position: "relative", maxWidth: 860, width: "100%" }} onClick={(e) => e.stopPropagation()}>
-            <button id="lightbox-close" onClick={() => setLb(null)} style={{
-              position: "absolute", top: -44, right: 0, background: "rgba(255,255,255,0.1)",
-              border: "none", borderRadius: 8, padding: "0.4rem", color: "#fff", cursor: "pointer", display: "flex"
-            }}>
-              <FiX size={22} />
-            </button>
-            <div style={{ position: "relative", aspectRatio: "4/3", borderRadius: 16, overflow: "hidden", background: "#0a0a0a" }}>
-              <Image src={ITEMS[lb].src} alt={ITEMS[lb].caption} fill style={{ objectFit: "contain" }} sizes="100vw" />
-            </div>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: "1rem", color: "#fff" }}>
-              <button id="lightbox-prev" onClick={prev} style={{ background: "rgba(255,255,255,0.1)", border: "none", borderRadius: 8, padding: "0.6rem", color: "#fff", cursor: "pointer", display: "flex" }}>
-                <FiChevronLeft size={20} />
-              </button>
-              <div style={{ textAlign: "center" }}>
-                <p style={{ fontWeight: 600, fontSize: "0.9rem" }}>{ITEMS[lb].caption}</p>
-                <p style={{ color: "rgba(255,255,255,0.45)", fontSize: "0.78rem" }}>{lb + 1} / {ITEMS.length}</p>
-              </div>
-              <button id="lightbox-next" onClick={next} style={{ background: "rgba(255,255,255,0.1)", border: "none", borderRadius: 8, padding: "0.6rem", color: "#fff", cursor: "pointer", display: "flex" }}>
-                <FiChevronRight size={20} />
-              </button>
-            </div>
-          </div>
-        </div>
+        <GalleryLightbox index={lb} onClose={() => setLb(null)} onPrev={prev} onNext={next} />
       )}
     </section>
   );

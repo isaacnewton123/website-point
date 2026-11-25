@@ -8,9 +8,7 @@ const inter = Inter({
   variable: "--font-inter",
 });
 
-// ─── Update BASE_URL saat deploy ─────────────────────────────────────────────
 const BASE_URL = "https://point-karawang.netlify.app";
-// ─────────────────────────────────────────────────────────────────────────────
 
 export const metadata: Metadata = {
   metadataBase: new URL(BASE_URL),

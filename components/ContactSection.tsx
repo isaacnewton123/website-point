@@ -27,7 +27,7 @@ function ContactLeftColumn() {
           Klik tombol di bawah untuk terhubung dengan admin POINT via WhatsApp.
         </p>
         <a id="contact-whatsapp"
-          href="https://wa.me/6281234567890?text=Halo%20admin%20POINT%2C%20saya%20ingin%20bergabung."
+          href="https://wa.me/6283117772744?text=Halo%20admin%20POINT%2C%20saya%20ingin%20bergabung."
           target="_blank" rel="noopener noreferrer"
           className="btn" style={{ background: "#22c55e", color: "#fff", width: "100%", justifyContent: "center", textDecoration: "none", gap: "0.5rem" }}>
           <FaWhatsapp size={18} /> Gabung via WhatsApp
@@ -78,7 +78,7 @@ function ContactRightColumn() {
         <p style={{ color: "rgba(255,255,255,0.65)", fontSize: "0.85rem", lineHeight: 1.7, marginBottom: "1.25rem" }}>
           Bergabunglah dengan ratusan driver online Karawang yang telah merasakan manfaat kebersamaan dalam komunitas POINT.
         </p>
-        <a id="contact-join-now" href="https://wa.me/6281234567890?text=Saya%20ingin%20bergabung%20POINT"
+        <a id="contact-join-now" href="https://wa.me/6283117772744?text=Saya%20ingin%20bergabung%20POINT"
           target="_blank" rel="noopener noreferrer"
           className="btn btn-primary" style={{ width: "100%", justifyContent: "center", textDecoration: "none" }}>
           Daftar Sekarang

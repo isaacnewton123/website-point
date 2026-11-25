@@ -7,7 +7,7 @@ const SOCIAL = [
   { icon: FaInstagram, href: "https://instagram.com", label: "Instagram" },
   { icon: FaFacebookF, href: "https://facebook.com", label: "Facebook" },
   { icon: FaXTwitter, href: "https://twitter.com", label: "Twitter" },
-  { icon: FaWhatsapp, href: "https://wa.me/6281234567890", label: "WhatsApp" },
+  { icon: FaWhatsapp, href: "https://wa.me/6283117772744", label: "WhatsApp" },
 ];
 
 function FooterBrand() {

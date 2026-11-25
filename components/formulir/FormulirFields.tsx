@@ -66,7 +66,7 @@ export function RestrictedNoticeCard({ error }: { error?: string }) {
       <p style={{ color: "var(--text-muted)", fontSize: "0.9rem", lineHeight: 1.65, marginBottom: "1.5rem" }}>
         {error || "Untuk menjaga keamanan database anggota, formulir pendaftaran hanya bisa dibuka melalui tautan undangan khusus yang dibagikan saat kamu bergabung ke grup WhatsApp POINT."}
       </p>
-      <a href="https://wa.me/6281234567890?text=Halo%20admin%20POINT%2C%20saya%20ingin%20bergabung."
+      <a href="https://wa.me/6283117772744?text=Halo%20admin%20POINT%2C%20saya%20ingin%20bergabung."
         target="_blank" rel="noopener noreferrer"
         className="btn" style={{ background: "#22c55e", color: "#fff", width: "100%", justifyContent: "center", gap: "0.5rem" }}>
         <FaWhatsapp size={18} /> Hubungi Admin via WhatsApp

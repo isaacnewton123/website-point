@@ -18,7 +18,7 @@ function HeroActions({ onAboutClick }: { onAboutClick: () => void }) {
       </button>
 
       <a id="hero-gabung-btn"
-        href="https://wa.me/6281234567890?text=Saya%20ingin%20bergabung%20POINT"
+        href="https://wa.me/6283117772744?text=Saya%20ingin%20bergabung%20POINT"
         target="_blank" rel="noopener noreferrer"
         style={{
           display: "inline-flex", alignItems: "center", gap: "0.5rem",

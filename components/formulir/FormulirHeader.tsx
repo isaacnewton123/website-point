@@ -30,16 +30,16 @@ export default function FormulirHeader() {
         }} />
         <div className="container" style={{ position: "relative", zIndex: 1, textAlign: "center" }}>
           <span className="badge" style={{ background: "rgba(249,115,22,0.16)", border: "1px solid rgba(249,115,22,0.32)" }}>
-            Pendataan Anggota
+            Pendaftaran Anggota Baru
           </span>
           <h1 style={{
             fontFamily: "var(--font-display)", fontWeight: 800, color: "#fff",
             fontSize: "clamp(1.75rem, 5vw, 2.65rem)", lineHeight: 1.15, marginBottom: "0.75rem",
           }}>
-            Formulir Data <span style={{ color: "var(--orange)" }}>POINT</span>
+            Formulir Pendaftaran <span style={{ color: "var(--orange)" }}>POINT</span>
           </h1>
           <p style={{ color: "rgba(255,255,255,0.68)", fontSize: "0.95rem", maxWidth: "34rem", margin: "0 auto", lineHeight: 1.65 }}>
-            Lengkapi data diri dan kendaraan kamu agar pendataan Paguyuban Online Lintas Timur Karawang rapi dan terdata resmi.
+            Lengkapi data pendaftaran anggota baru Paguyuban Online Lintas Timur (POINT) Karawang.
           </p>
         </div>
         <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, lineHeight: 0 }}>

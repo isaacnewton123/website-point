@@ -5,8 +5,8 @@ import FormulirClient from "@/components/formulir/FormulirClient";
 import FormulirHeader from "@/components/formulir/FormulirHeader";
 
 export const metadata: Metadata = {
-  title: "Formulir Data Anggota",
-  description: "Lengkapi data diri dan kendaraan anggota POINT Karawang secara online.",
+  title: "Formulir Pendaftaran Anggota",
+  description: "Formulir pendaftaran anggota baru POINT Karawang melalui tautan undangan grup WhatsApp.",
 };
 
 function FormulirFallback() {

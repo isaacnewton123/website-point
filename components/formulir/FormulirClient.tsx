@@ -2,12 +2,12 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { FiCheck, FiRefreshCw } from "react-icons/fi";
+import { FiCheck } from "react-icons/fi";
 import {
   FIELDS,
-  LookupCard,
   ProfileField,
   ProgressCard,
+  RestrictedNoticeCard,
   type FormApiResponse,
   type KolomKey,
   type ProfilData,
@@ -17,13 +17,13 @@ const EMPTY_PROFIL: ProfilData = {
   nama_lengkap: "", tanggal_lahir: "", alamat: "", plat: "", tipe_warna_unit: "",
 };
 
-async function fetchFormulir(query: string): Promise<{ ok: boolean; data: FormApiResponse }> {
-  const res = await fetch(`/api/formulir?${query}`);
+async function fetchUndangan(token: string): Promise<{ ok: boolean; data: FormApiResponse }> {
+  const res = await fetch(`/api/formulir?t=${encodeURIComponent(token)}`);
   const data = (await res.json()) as FormApiResponse;
   return { ok: res.ok && data.ok, data };
 }
 
-async function postFormulir(payload: Record<string, string>): Promise<{ ok: boolean; data: FormApiResponse }> {
+async function postPendaftaran(payload: Record<string, string>): Promise<{ ok: boolean; data: FormApiResponse }> {
   const res = await fetch("/api/formulir", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -42,20 +42,20 @@ function useTokenLoader(
   useEffect(() => {
     if (!token) return;
     let aktif = true;
-    fetchFormulir(`t=${encodeURIComponent(token)}`)
+    fetchUndangan(token)
       .then(({ ok, data }) => {
         if (!aktif) return;
-        if (!ok) onError(data.error || "Tautan tidak valid atau kedaluwarsa.");
+        if (!ok) onError(data.error || "Tautan undangan tidak valid atau kedaluwarsa.");
         else onSuccess(data);
       })
-      .catch(() => { if (aktif) onError("Gagal memuat data formulir."); })
+      .catch(() => { if (aktif) onError("Gagal memuat formulir pendaftaran."); })
       .finally(() => { if (aktif) onDone(); });
     return () => { aktif = false; };
   }, [token, onSuccess, onError, onDone]);
 }
 
-function buildPayload(token: string, activeNomor: string, profil: ProfilData): Record<string, string> {
-  const payload: Record<string, string> = token ? { token } : { nomor: activeNomor };
+function buildPayload(token: string, profil: ProfilData): Record<string, string> {
+  const payload: Record<string, string> = { token };
   for (const f of FIELDS) {
     const v = profil[f.key].trim();
     if (v) payload[f.key] = v;
@@ -64,8 +64,8 @@ function buildPayload(token: string, activeNomor: string, profil: ProfilData): R
 }
 
 function useFormulirState(token: string) {
-  const [nomorInput, setNomorInput] = useState("");
   const [activeNomor, setActiveNomor] = useState("");
+  const [tokenError, setTokenError] = useState("");
   const [profil, setProfil] = useState<ProfilData>(EMPTY_PROFIL);
   const [loading, setLoading] = useState(Boolean(token));
   const [saving, setSaving] = useState(false);
@@ -75,58 +75,42 @@ function useFormulirState(token: string) {
   useTokenLoader(
     token,
     useCallback((data: FormApiResponse) => { setActiveNomor(data.nomor ?? ""); setProfil(data.profil ?? EMPTY_PROFIL); }, []),
-    useCallback((msg: string) => setAlert({ msg, ok: false }), []),
+    useCallback((msg: string) => setTokenError(msg), []),
     useCallback(() => setLoading(false), []),
   );
-
-  async function cekNomor(e: React.FormEvent) {
-    e.preventDefault();
-    if (!nomorInput.trim()) { setAlert({ msg: "Masukkan nomor WhatsApp dulu ya.", ok: false }); return; }
-    setAlert(null); setLoading(true);
-    try {
-      const { ok, data } = await fetchFormulir(`nomor=${encodeURIComponent(nomorInput.trim())}`);
-      if (!ok) { setAlert({ msg: data.error || "Format nomor WhatsApp tidak valid.", ok: false }); return; }
-      setActiveNomor(data.nomor ?? ""); setProfil(data.profil ?? EMPTY_PROFIL);
-    } catch { setAlert({ msg: "Gagal menghubungi server.", ok: false }); }
-    finally { setLoading(false); }
-  }
 
   async function simpan(e: React.FormEvent) {
     e.preventDefault();
     setAlert(null); setErrors({}); setSaving(true);
     try {
-      const { ok, data } = await postFormulir(buildPayload(token, activeNomor, profil));
+      const { ok, data } = await postPendaftaran(buildPayload(token, profil));
       if (!ok) {
         if (data.errors) setErrors(data.errors);
         setAlert({ msg: data.error || "Periksa kembali isian yang masih belum valid.", ok: false });
         return;
       }
       setProfil(data.profil ?? profil);
-      setAlert({ msg: data.status === "LENGKAP" ? "Terima kasih! Data kamu sudah lengkap dan tersimpan." : "Data berhasil disimpan. Sisa kolom bisa dilengkapi kapan saja.", ok: true });
-    } catch { setAlert({ msg: "Gagal menyimpan data ke server.", ok: false }); }
+      setAlert({ msg: data.status === "LENGKAP" ? "Pendaftaran berhasil! Data kamu sudah lengkap dan tersimpan." : "Data tersimpan. Sisa kolom bisa dilengkapi kapan saja.", ok: true });
+    } catch { setAlert({ msg: "Gagal menyimpan pendaftaran ke server.", ok: false }); }
     finally { setSaving(false); }
   }
 
   return {
-    nomorInput, setNomorInput, activeNomor, profil, loading, saving, alert, errors, cekNomor, simpan,
+    activeNomor, tokenError, profil, loading, saving, alert, errors, simpan,
     updateField: (k: KolomKey, v: string) => setProfil((prev) => ({ ...prev, [k]: v })),
-    resetNomor: () => { setActiveNomor(""); setAlert(null); setErrors({}); },
   };
 }
 
 function ProfileFormCard(props: {
   activeNomor: string; profil: ProfilData; errors: Record<string, string>;
-  saving: boolean; showReset: boolean;
-  onFieldChange: (k: KolomKey, v: string) => void;
-  onSubmit: (e: React.FormEvent) => void;
-  onReset: () => void;
+  saving: boolean; onFieldChange: (k: KolomKey, v: string) => void; onSubmit: (e: React.FormEvent) => void;
 }) {
   const terisi = FIELDS.filter((f) => Boolean(props.profil[f.key].trim())).length;
   return (
     <form onSubmit={props.onSubmit} style={{ display: "flex", flexDirection: "column", gap: "1rem" }} noValidate>
       <ProgressCard terisi={terisi} />
       <div className="form-group">
-        <label className="form-label" htmlFor="nomor-aktif">Nomor WhatsApp</label>
+        <label className="form-label" htmlFor="nomor-aktif">Nomor WhatsApp Terdaftar</label>
         <input id="nomor-aktif" type="text" className="form-input" value={props.activeNomor} readOnly
           style={{ background: "var(--bg)", color: "var(--text-muted)", fontWeight: 600 }} />
       </div>
@@ -136,20 +120,14 @@ function ProfileFormCard(props: {
           onChange={(v) => props.onFieldChange(f.key, v)} />
       ))}
       <button type="submit" disabled={props.saving} className="btn btn-primary" style={{ width: "100%", justifyContent: "center", marginTop: "0.4rem" }}>
-        {props.saving ? "Menyimpan..." : <><FiCheck size={17} /> Simpan Data</>}
+        {props.saving ? "Menyimpan..." : <><FiCheck size={17} /> Kirim Pendaftaran</>}
       </button>
-      {props.showReset && (
-        <button type="button" onClick={props.onReset} className="btn btn-ghost" style={{ width: "100%", justifyContent: "center" }}>
-          <FiRefreshCw size={15} /> Ganti Nomor WA
-        </button>
-      )}
     </form>
   );
 }
 
 export default function FormulirClient() {
-  const sp = useSearchParams();
-  const token = sp.get("t") ?? "";
+  const token = useSearchParams().get("t") ?? "";
   const st = useFormulirState(token);
 
   return (
@@ -167,14 +145,13 @@ export default function FormulirClient() {
               {st.alert.msg}
             </div>
           )}
-          {st.loading && !st.activeNomor ? (
-            <p style={{ textAlign: "center", color: "var(--text-muted)", padding: "2rem 0" }}>Memuat data anggota...</p>
-          ) : !st.activeNomor ? (
-            <LookupCard nomor={st.nomorInput} loading={st.loading} onChange={st.setNomorInput} onSubmit={st.cekNomor} />
+          {!token || st.tokenError ? (
+            <RestrictedNoticeCard error={st.tokenError} />
+          ) : st.loading && !st.activeNomor ? (
+            <p style={{ textAlign: "center", color: "var(--text-muted)", padding: "2rem 0" }}>Memuat formulir pendaftaran...</p>
           ) : (
             <ProfileFormCard activeNomor={st.activeNomor} profil={st.profil} errors={st.errors}
-              saving={st.saving} showReset={!token} onFieldChange={st.updateField}
-              onSubmit={st.simpan} onReset={st.resetNomor} />
+              saving={st.saving} onFieldChange={st.updateField} onSubmit={st.simpan} />
           )}
         </div>
       </div>

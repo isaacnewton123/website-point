@@ -3,7 +3,6 @@ import { getFormSecret, verifikasiTokenFormulir } from "@/lib/formulir-token";
 import {
   KOLOM_WAJIB,
   LABEL_KOLOM,
-  normalisasiNomor,
   validasiKolom,
   type KolomWajib,
 } from "@/lib/formulir-validasi";
@@ -16,24 +15,14 @@ import {
 
 export const dynamic = "force-dynamic";
 
-type BodyPayload = Partial<Record<"token" | "nomor" | KolomWajib, unknown>>;
+type BodyPayload = Partial<Record<"token" | KolomWajib, unknown>>;
 
-function selesaikanNomor(
-  token: string | undefined,
-  nomorRaw: string | undefined,
-  secret: string,
-): { nomor?: string; error?: string } {
-  if (token && token.trim()) {
-    const ver = verifikasiTokenFormulir(token.trim(), secret);
-    return ver
-      ? { nomor: ver.nomor }
-      : { error: "Tautan formulir tidak valid atau sudah kedaluwarsa." };
-  }
-  if (nomorRaw && nomorRaw.trim()) {
-    const norm = normalisasiNomor(nomorRaw);
-    return norm ? { nomor: norm } : { error: "Format nomor WhatsApp tidak valid." };
-  }
-  return { error: "Sertakan token atau nomor WhatsApp." };
+const PESAN_TERKUNCI =
+  "Formulir pendaftaran hanya bisa diakses melalui tautan undangan resmi dari grup WhatsApp POINT.";
+
+function verifikasiUndangan(tokenRaw: unknown, secret: string): string | null {
+  if (typeof tokenRaw !== "string" || !tokenRaw.trim()) return null;
+  return verifikasiTokenFormulir(tokenRaw.trim(), secret)?.nomor ?? null;
 }
 
 function bentukProfil(row: AnggotaProfilRow | null) {
@@ -62,16 +51,15 @@ function validasiPayload(body: BodyPayload) {
 export async function GET(request: NextRequest) {
   try {
     const secret = getFormSecret(getDatabaseUrl());
-    const sp = request.nextUrl.searchParams;
-    const hasil = selesaikanNomor(sp.get("t") ?? undefined, sp.get("nomor") ?? undefined, secret);
-    if (!hasil.nomor) {
-      return NextResponse.json({ ok: false, error: hasil.error }, { status: 400 });
+    const nomor = verifikasiUndangan(request.nextUrl.searchParams.get("t"), secret);
+    if (!nomor) {
+      return NextResponse.json({ ok: false, error: PESAN_TERKUNCI }, { status: 401 });
     }
-    const anggota = await ambilAnggotaByNomor(hasil.nomor);
+    const anggota = await ambilAnggotaByNomor(nomor);
     return NextResponse.json({
       ok: true,
       ditemukan: Boolean(anggota),
-      nomor: hasil.nomor,
+      nomor,
       status: anggota?.status ?? "DATA_KURANG",
       kekurangan: anggota?.kekurangan ?? [...KOLOM_WAJIB],
       profil: bentukProfil(anggota),
@@ -86,11 +74,9 @@ export async function POST(request: NextRequest) {
   try {
     const body = (await request.json().catch(() => ({}))) as BodyPayload;
     const secret = getFormSecret(getDatabaseUrl());
-    const token = typeof body.token === "string" ? body.token : undefined;
-    const nomorRaw = typeof body.nomor === "string" ? body.nomor : undefined;
-    const hasil = selesaikanNomor(token, nomorRaw, secret);
-    if (!hasil.nomor) {
-      return NextResponse.json({ ok: false, error: hasil.error }, { status: 400 });
+    const nomor = verifikasiUndangan(body.token, secret);
+    if (!nomor) {
+      return NextResponse.json({ ok: false, error: PESAN_TERKUNCI }, { status: 401 });
     }
 
     const { isian, errors } = validasiPayload(body);
@@ -107,7 +93,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const anggota = await simpanAnggotaFormulir(hasil.nomor, isian);
+    const anggota = await simpanAnggotaFormulir(nomor, isian);
     return NextResponse.json({
       ok: true,
       nomor: anggota.nomor,

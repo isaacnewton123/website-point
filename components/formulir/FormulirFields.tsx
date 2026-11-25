@@ -1,6 +1,7 @@
 "use client";
 
-import { FiArrowRight, FiCheckCircle, FiPhone } from "react-icons/fi";
+import { FaWhatsapp } from "react-icons/fa";
+import { FiCheckCircle, FiLock } from "react-icons/fi";
 
 export type KolomKey = "nama_lengkap" | "tanggal_lahir" | "alamat" | "plat" | "tipe_warna_unit";
 export type ProfilData = Record<KolomKey, string>;
@@ -33,7 +34,7 @@ export function ProgressCard({ terisi }: { terisi: number }) {
     }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.55rem", fontSize: "0.85rem" }}>
         <span style={{ color: "var(--text-muted)", fontWeight: 600 }}>
-          {lengkap ? "Semua data wajib sudah lengkap!" : `Masih ada ${FIELDS.length - terisi} data yang perlu diisi`}
+          {lengkap ? "Semua data pendaftaran sudah lengkap!" : `Masih ada ${FIELDS.length - terisi} data yang perlu diisi`}
         </span>
         <span style={{ fontWeight: 700, color: lengkap ? "#16a34a" : "var(--orange)" }}>
           {terisi}/{FIELDS.length}
@@ -49,29 +50,28 @@ export function ProgressCard({ terisi }: { terisi: number }) {
   );
 }
 
-export function LookupCard(props: {
-  nomor: string;
-  loading: boolean;
-  onChange: (v: string) => void;
-  onSubmit: (e: React.FormEvent) => void;
-}) {
+export function RestrictedNoticeCard({ error }: { error?: string }) {
   return (
-    <form onSubmit={props.onSubmit}>
-      <div className="form-group" style={{ marginBottom: "1.15rem" }}>
-        <label className="form-label" htmlFor="lookup-nomor">Nomor WhatsApp Terdaftar</label>
-        <div style={{ position: "relative" }}>
-          <FiPhone size={16} style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: "var(--text-muted)" }} />
-          <input id="lookup-nomor" type="tel" className="form-input" style={{ paddingLeft: "2.45rem" }}
-            placeholder="Contoh: 081234567890" value={props.nomor} onChange={(e) => props.onChange(e.target.value)} />
-        </div>
-        <span style={{ fontSize: "0.78rem", color: "var(--text-muted)" }}>
-          Masukkan nomor WA yang aktif di grup POINT Karawang.
-        </span>
+    <div style={{ textAlign: "center", padding: "0.5rem 0" }}>
+      <div style={{
+        width: 56, height: 56, borderRadius: 16, margin: "0 auto 1rem",
+        background: "rgba(249,115,22,0.12)", color: "var(--orange)",
+        display: "flex", alignItems: "center", justifyContent: "center",
+      }}>
+        <FiLock size={24} />
       </div>
-      <button type="submit" disabled={props.loading} className="btn btn-primary" style={{ width: "100%", justifyContent: "center" }}>
-        {props.loading ? "Memeriksa..." : <>Cek Data Saya <FiArrowRight size={16} /></>}
-      </button>
-    </form>
+      <h2 style={{ fontFamily: "var(--font-display)", fontSize: "1.2rem", fontWeight: 700, marginBottom: "0.5rem" }}>
+        Tautan Undangan Diperlukan
+      </h2>
+      <p style={{ color: "var(--text-muted)", fontSize: "0.9rem", lineHeight: 1.65, marginBottom: "1.5rem" }}>
+        {error || "Untuk menjaga keamanan database anggota, formulir pendaftaran hanya bisa dibuka melalui tautan undangan khusus yang dibagikan saat kamu bergabung ke grup WhatsApp POINT."}
+      </p>
+      <a href="https://wa.me/6281234567890?text=Halo%20admin%20POINT%2C%20saya%20ingin%20bergabung."
+        target="_blank" rel="noopener noreferrer"
+        className="btn" style={{ background: "#22c55e", color: "#fff", width: "100%", justifyContent: "center", gap: "0.5rem" }}>
+        <FaWhatsapp size={18} /> Hubungi Admin via WhatsApp
+      </a>
+    </div>
   );
 }
 

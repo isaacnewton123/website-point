@@ -12,6 +12,9 @@ const BASE_URL = "https://point-karawang.netlify.app";
 
 export const metadata: Metadata = {
   metadataBase: new URL(BASE_URL),
+  alternates: {
+    canonical: BASE_URL,
+  },
 
   title: {
     default: "POINT – Paguyuban Online Lintas Timur | Karawang",
@@ -105,7 +108,6 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-title" content="POINT - Karawang" />
         <meta name="theme-color" content="#1e2a5e" />
         <meta name="color-scheme" content="light dark" />
-        <link rel="canonical" href={BASE_URL} />
       </head>
       <body className="antialiased">{children}</body>
     </html>
